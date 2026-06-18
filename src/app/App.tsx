@@ -1533,10 +1533,19 @@ export default function App() {
       .flatMap(s => { try { return Array.from(s.cssRules).map(r => r.cssText); } catch { return []; } })
       .join("\n");
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${styles}</style></head><body>${el.outerHTML}</body></html>`;
-    navigator.clipboard.writeText(html).then(() => {
+    const ta = document.createElement("textarea");
+    ta.value = html;
+    ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand("copy");
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    } finally {
+      document.body.removeChild(ta);
+    }
   }
 
   // Switcher is portalled directly into <body> — completely outside the page
