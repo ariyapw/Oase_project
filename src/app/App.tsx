@@ -1517,12 +1517,28 @@ function OrganicHome() {
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const [active, setActive] = useState<StyleOption>("glassy");
+  const [copied, setCopied] = useState(false);
+
   const opts: { id: StyleOption; label: string }[] = [
     { id: "glassy",       label: "① Glassy"          },
     { id: "glassmorphic", label: "② Glassmorphic"    },
     { id: "botanical",    label: "③ Dark Botanical"  },
     { id: "organic",      label: "④ Organic Luxury"  },
   ];
+
+  function handleCopyDesign() {
+    const el = document.getElementById("oase-page");
+    if (!el) return;
+    const styles = Array.from(document.styleSheets)
+      .flatMap(s => { try { return Array.from(s.cssRules).map(r => r.cssText); } catch { return []; } })
+      .join("\n");
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${styles}</style></head><body>${el.outerHTML}</body></html>`;
+    navigator.clipboard.writeText(html).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   // Switcher is portalled directly into <body> — completely outside the page
   // DOM tree so it won't be included when selecting/copying the page to Figma.
   const switcher = createPortal(
@@ -1536,6 +1552,11 @@ export default function App() {
           {label}
         </button>
       ))}
+      <div style={{ width: "1px", background: "rgba(255,255,255,0.15)", margin: "4px 2px" }} />
+      <button onClick={handleCopyDesign}
+        style={{ padding: "6px 15px", borderRadius: "100px", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.04em", border: "none", cursor: "pointer", fontFamily: "'Montserrat', sans-serif", transition: "all 0.22s ease", background: copied ? "rgba(120,220,120,0.85)" : "rgba(255,255,255,0.12)", color: copied ? "#0a1e0a" : "rgba(255,255,255,0.75)" }}>
+        {copied ? "✓ Copied!" : "Copy Design"}
+      </button>
     </div>,
     document.body
   );
